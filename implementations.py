@@ -21,7 +21,7 @@ def _mse_loss(y: np.ndarray, tx: np.ndarray, w: np.ndarray) -> float:
     Mean Squared Error loss: (1/(2N)) * ||y - tx @ w||^2
     """
     e = y - tx @ w
-    return float(0.5 * np.mean(e**2), dtype=float)
+    return float(0.5 * np.mean(e**2))
 
 
 def _mse_grad(y: np.ndarray, tx: np.ndarray, w: np.ndarray) -> np.ndarray:
@@ -51,7 +51,9 @@ def mean_squared_error_gd(
     w = initial_w.astype(float).copy()
     for _ in range(max_iters):
         w -= gamma * _mse_grad(y, tx, w)
-    return w, _mse_loss(y, tx, w)
+    #return w, _mse_loss(y, tx, w)
+    return w.reshape(-1), float(_mse_loss(y, tx, w))
+
 
 
 # -------------------- Stochastic Gradient Descent (MSE) -----------------------
@@ -79,7 +81,9 @@ def mean_squared_error_sgd(
         grad = (tx_b.T @ (tx_b @ w - y_b)) / 1.0
         w -= gamma * grad
 
-    return w, _mse_loss(y, tx, w)
+    #return w, _mse_loss(y, tx, w)
+    return w.reshape(-1), float(_mse_loss(y, tx, w))
+
 
 
 # --------------------------- Closed-form (OLS) --------------------------------
@@ -93,7 +97,8 @@ def least_squares(y: np.ndarray, tx: np.ndarray):
     X = tx
     y = y.astype(float)
     w, *_ = np.linalg.lstsq(X, y, rcond=None)  # robust to rank deficiency
-    return w, _mse_loss(y, X, w)
+    #return w, _mse_loss(y, X, w)
+    return w.reshape(-1), float(_mse_loss(y, X, w))
 
 
 # ------------------------------ Ridge (L2) ------------------------------------
@@ -111,7 +116,8 @@ def ridge_regression(y: np.ndarray, tx: np.ndarray, lambda_: float):
     A = X.T @ X + (2.0 * N * lambda_) * np.eye(D)
     b = X.T @ y
     w = np.linalg.solve(A, b)
-    return w, _mse_loss(y, X, w)
+    #return w, _mse_loss(y, X, w)
+    return w.reshape(-1), float(_mse_loss(y, X, w))
 
 
 # ------------------------- Logistic Regression (NLL) --------------------------
@@ -133,7 +139,8 @@ def _logistic_loss(y: np.ndarray, tx: np.ndarray, w: np.ndarray) -> float:
     eps = 1e-15
     p = np.clip(p, eps, 1.0 - eps)
     val = -(y * np.log(p) + (1.0 - y) * np.log(1.0 - p)).mean()
-    return np.array(val, dtype=float)
+    #return np.array(val, dtype=float)
+    return float(val)
 
 
 def _logistic_grad(y: np.ndarray, tx: np.ndarray, w: np.ndarray) -> np.ndarray:
@@ -159,7 +166,9 @@ def logistic_regression(
     w = initial_w.astype(float).copy()
     for _ in range(max_iters):
         w -= gamma * _logistic_grad(y, tx, w)
-    return w, _logistic_loss(y, tx, w)
+    #return w, _logistic_loss(y, tx, w)
+    return w.reshape(-1), float(_logistic_loss(y, tx, w))
+
 
 
 # --------------- Regularized Logistic Regression (L2) -------------------------
